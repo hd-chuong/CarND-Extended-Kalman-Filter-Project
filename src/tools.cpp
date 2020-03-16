@@ -39,6 +39,7 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
 
    rmse = accum / n;
    rmse = rmse.array().sqrt();
+
    return rmse;
 }
 
@@ -47,9 +48,8 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
    * TODO:
    * Calculate a Jacobian here.
    */
-  MatrixXd Hj(4,4);
+  MatrixXd Hj(3,4);
   Hj << 0, 0, 0, 0,
-        0, 0, 0, 0,
         0, 0, 0, 0,
         0, 0, 0, 0;
   double px = x_state(0);
@@ -70,5 +70,6 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
    Hj << px / distance,           py / distance,             0,             0,
  -py / distance_square,     px / distance_square,      0,             0,
    py * (vx*py - vy*px) / pow(distance, 3), px * (vy*px - vx*py)/ pow(distance, 3),    px / distance, py / distance;
+
   return Hj;
 }

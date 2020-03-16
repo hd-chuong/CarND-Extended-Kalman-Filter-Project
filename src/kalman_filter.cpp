@@ -1,6 +1,6 @@
 #include "kalman_filter.h"
 #include "tools.h"
-
+#include "iostream"
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
@@ -36,12 +36,21 @@ void KalmanFilter::Update(const VectorXd &z) {
   /**
    * TODO: update the state by using Kalman Filter equations
    */
-  VectorXd y = z - H_ * x_;
-  MatrixXd S = H_ * P_ * H_.transpose() + R_;
-  MatrixXd K = P_ * H_.transpose() * S.inverse();
-  MatrixXd I = MatrixXd::Identity(x_.size(), x_.size());
-  x_ += K*y;
-  P_ = (I - K*H_)* P_;
+    VectorXd y = z - H_ * x_;
+    MatrixXd S = H_ * P_ * H_.transpose() + R_;
+    MatrixXd K = P_ * H_.transpose() * S.inverse();
+    MatrixXd I = MatrixXd::Identity(x_.size(), x_.size());
+    x_ += K*y;
+    P_ = (I - K*H_)* P_;
+}
+
+double normalize_angle(double x)
+{
+  /*
+    Aim to bring any angle into [-pi, pi]
+  */
+  double pi = atan(1) * 4.0;
+  return fmod(x + pi, pi * 2) - pi; 
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
@@ -55,7 +64,6 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 
   double h_rho = pow(px*px + py*py, 0.5);
   double h_phi = atan2(py, px);
-  
   // check if h_rho is non-zero
   if (h_rho < ESP)
   {
@@ -68,18 +76,18 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   h << h_rho, h_phi, h_rhodot;
 
   VectorXd y = z - h;
-
+  
+  //normalize the angle 
+  
+  y(1) = normalize_angle(y(1));
   Tools tool = Tools();
-  MatrixXd Hj = tool.CalculateJacobian(x_);
-
-  MatrixXd S = Hj * P_ * Hj.transpose() + R_;
-  MatrixXd K = P_* Hj * S.inverse();
-  
+  MatrixXd S = H_ * P_ * H_.transpose() + R_;
+  MatrixXd K = P_* H_.transpose() * S.inverse(); 
   x_ += K * y;
-  
   MatrixXd I = MatrixXd::Identity(x_.size(), x_.size());
 
-  P_  = (I - K * Hj) * P_;
-
+  P_  = (I - K * H_) * P_;
 }
+
+
 

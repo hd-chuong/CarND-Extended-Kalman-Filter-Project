@@ -46,8 +46,8 @@ class FusionEKF {
   Eigen::MatrixXd Hj_;
   Eigen::MatrixXd P_init_;
 
-  MatrixXd CalculateProcessCovarianceMatrix(double dt, double sigma_x_square, double sigma_y_square);
-  MatrixXd CalculateTransitionMatrix(double dt);
+  Eigen::MatrixXd CalculateProcessCovarianceMatrix(double dt, double sigma_x_square, double sigma_y_square);
+  Eigen::MatrixXd CalculateTransitionMatrix(double dt);
 };
 
 #endif // FusionEKF_H_
